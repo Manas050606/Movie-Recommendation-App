@@ -49,18 +49,43 @@ if movies_df is not None:
         'Type or select a movie you like:',
         movies_df['title'].values
     )
+    lang_filter = st.checkbox('Show movies in the same language only', value=True)
 
     # Add a "Recommend" button
-    if st.button('Get Recommendations'):
-        if selected_movie:
-            with st.spinner('Finding similar movies...'):
-                recommendations = get_recommendations_v2(selected_movie)
-                st.subheader(f'Top 10 movies similar to "{selected_movie}":')
-                
-                # Display the list of movies
-                for i, movie in enumerate(recommendations):
+    # Add a "Recommend" button
+if st.button('Get Recommendations'):
+    if selected_movie:
+        with st.spinner('Finding similar movies...'):
+            # Get the list of recommended movie TITLES
+            recommendations_titles = get_recommendations_v2(selected_movie)
+
+            # Get the full DataFrame for these recommended movies
+            rec_df = movies_df[movies_df['title'].isin(recommendations_titles)]
+
+            final_recommendations = []
+
+            # Check if the filter is on
+            if lang_filter:
+                # 1. Get the language of the movie we selected
+                source_lang = movies_df[movies_df['title'] == selected_movie].original_language.iloc[0]
+
+                # 2. Filter our recommendations to only include movies with that same language
+                final_df = rec_df[rec_df['original_language'] == source_lang]
+
+                # 3. Get the titles from this filtered list
+                final_recommendations = final_df['title']
+            else:
+                # If filter is off, just use all the original recommendations
+                final_recommendations = recommendations_titles
+
+
+            st.subheader(f'Top movies similar to "{selected_movie}":')
+
+            # Display the list of movies
+            if not final_recommendations.empty:
+                for i, movie in enumerate(final_recommendations):
                     st.write(f"{i+1}. {movie}")
-        else:
-            st.warning("Please select a movie.")
-else:
-    st.info("Waiting for data files to be loaded...")
+            else:
+                st.write("No recommendations found with the selected filter.")
+    else:
+        st.warning("Please select a movie.")

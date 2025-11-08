@@ -24,7 +24,7 @@ df = credits_df.merge(movies_df, on='movie_id')
 print("Merged data shape:", df.shape)
 
 # We don't need all these columns. Let's select just the ones we want.
-features = ['movie_id', 'title_y', 'overview', 'genres', 'keywords', 'cast', 'crew']
+features = ['movie_id', 'title_y', 'overview', 'genres', 'keywords', 'cast', 'crew', 'original_language']
 df_filtered = df[features]
 
 # Let's rename 'title_y' back to 'title' for simplicity
@@ -114,7 +114,7 @@ print("Combining all features into a 'tags' column...")
 df['tags'] = df['overview'] + df['genres'] + df['keywords'] + df['cast'] + df['crew']
 
 # We no longer need the original columns, just 'movie_id', 'title', and 'tags'
-final_df = df[['movie_id', 'title', 'tags']]
+final_df = df[['movie_id', 'title', 'tags', 'original_language']]
 
 # The 'tags' column is currently a list. Let's join it into a single string.
 final_df['tags'] = final_df['tags'].apply(lambda x: " ".join(x))
